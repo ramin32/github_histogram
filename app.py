@@ -8,6 +8,7 @@ import json
 app = Flask(__name__)
 github = Github()
 
+CACHE_MAX_SIZE = 1000 
 data_cache = {} # caches all repo stats computer for each user until a reset is requested
 
 def previous_monday(date):
@@ -65,6 +66,10 @@ def weekly_commits(username='ramin32'):
                 return render_template('error.html', username=username, error=e)
 
             repos_data.append(repo_stats)
+
+        # ensure cache size
+        if len(data_cache) > CACHE_MAX_SIZE:
+            data_cache.clear()
 
         data_cache[username] = repos_data
 
