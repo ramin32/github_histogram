@@ -9,7 +9,7 @@ app = Flask(__name__)
 github = Github()
 
 CACHE_MAX_SIZE = 1000 
-data_cache = {} # caches all repo stats computer for each user until a reset is requested
+data_cache = {} 
 
 def previous_monday(date):
     delta = timedelta(days=date.weekday())
@@ -31,7 +31,7 @@ class RepoStats(object):
         except RuntimeError:
             raise LookupError('Error occured while fetching commits for ' + self.url)
 
-        # increment previous week commits if week is the same
+        # increment commit count or create a new count
         for c in reversed(commits):
             date_id = format_date(previous_monday(c.committed_date.date()))
             if not self.weekly_commits:
