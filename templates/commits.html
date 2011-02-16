@@ -9,6 +9,19 @@
 <p>
 Commits are only loaded once, clear cache to see latest activity: <a href="{{url_for('clear_cache')}}"<input type="button" value="Clear Cache" id="clear_cache_button"/></a>
 </p>
+
+<div id="cached_links">
+    Cached Accounts: 
+    {% for username in cache.keys() %}
+        {% if loop.last %}
+            <a href="{{url_for('weekly_commits', username=username)}}">{{username}}</a> 
+        {% else %}
+            <a href="{{url_for('weekly_commits', username=username)}}">{{username}}</a> |
+        {% endif %}
+    {% endfor %}
+</div>
+
+
 <div id="histograms">
 {% for repo_stats in repos_data %}
 <div class="histogram">

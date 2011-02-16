@@ -74,6 +74,7 @@ def weekly_commits(username='ramin32'):
         data_cache[username] = repos_data
 
     return render_template('commits.html', 
+            cache=data_cache,
             username=username,
             repos_data=data_cache[username])
 

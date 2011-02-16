@@ -19,6 +19,13 @@ a {
     text-decoration:none;
 }
 
+#cached_links a{
+     text-decoration: underline;
+     color: #0062bd;
+     font-weight:bold;
+
+}
+
 .error{
     font-weight:bold;
     color:red;
