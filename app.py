@@ -4,10 +4,14 @@ from flask import Flask, render_template, request, redirect
 from datetime import timedelta
 from babel.dates import format_date
 import json
+from multiprocessing import Lock
+
 
 app = Flask(__name__)
+
 github = Github()
 
+cache_lock = Lock()
 CACHE_MAX_SIZE = 1000 
 data_cache = {} 
 
@@ -68,10 +72,14 @@ def weekly_commits(username='ramin32'):
             repos_data.append(repo_stats)
 
         # ensure cache size
-        if len(data_cache) > CACHE_MAX_SIZE:
-            data_cache.clear()
+        cache_lock.acquire()
+        try:
+            if len(data_cache) > CACHE_MAX_SIZE:
+                data_cache.clear()
 
-        data_cache[username] = repos_data
+            data_cache[username] = repos_data
+        finally:
+            cache_lock.release()
 
     return render_template('commits.html', 
             cache=data_cache,
@@ -80,7 +88,11 @@ def weekly_commits(username='ramin32'):
 
 @app.route('/clear_cache')
 def clear_cache():
-    data_cache.clear()
+    cache_lock.acquire()
+    try:
+        data_cache.clear()
+    finally:
+        cache_lock.release()
     return redirect('/')
 
 
