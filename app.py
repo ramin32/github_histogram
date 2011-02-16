@@ -4,7 +4,6 @@ from flask import Flask, render_template, request, redirect
 from datetime import timedelta
 from babel.dates import format_date
 import json
-from collections import OrderedDict
 
 app = Flask(__name__)
 github = Github()
@@ -29,7 +28,7 @@ class RepoStats(object):
         try:
             commits = github.commits.list(self.url, self.branch)
         except RuntimeError:
-            raise LookupError('Error occured while fetching commits for ' + repo_url)
+            raise LookupError('Error occured while fetching commits for ' + self.url)
 
         # increment previous week commits if week is the same
         for c in reversed(commits):
@@ -52,9 +51,7 @@ def weekly_commits(username='ramin32'):
         try:
             repos = github.repos.list(username)
         except RuntimeError:
-            return render_template('error.html', 
-                username=username,
-                error='Invalid Username')
+            return render_template('error.html', username=username, error='Invalid Username')
 
         repos_data = []
 
@@ -62,7 +59,11 @@ def weekly_commits(username='ramin32'):
         for repo in repos:
             relative_repo_url = '%s/%s' % (username, repo.name)
             repo_stats = RepoStats(relative_repo_url)
-            repo_stats.compute_stats()
+            try:
+                repo_stats.compute_stats()
+            except LookupError, e:
+                return render_template('error.html', username=username, error=e)
+
             repos_data.append(repo_stats)
 
         data_cache[username] = repos_data
