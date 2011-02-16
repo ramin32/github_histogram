@@ -1,0 +1,25 @@
+<!doctype>
+
+<html>
+    <head>
+        <title>Weekly GitHub Commits</title>
+        <script type="text/javascript" src="/static/js/protovis-r3.2.js"></script>
+         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/actions.js"></script>
+         <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+    {% block title %}
+    {% endblock %}
+    <div id="site_actions">
+        <p>
+            <label for="username_field">Username: </label>
+            <input type="text" value="{{username}}" id="username_field"/>
+            <input type="button" value="Update" id="update_button"/>
+        </p>
+    </div>
+    {% block body %}
+    {% endblock %}
+</body>
+</html>
+

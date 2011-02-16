@@ -9,13 +9,41 @@ from collections import OrderedDict
 app = Flask(__name__)
 github = Github()
 
-app.jinja_env.filters['format_date'] = lambda d: format_date(d, locale='en')
-
-data_cache = {}
+data_cache = {} # caches all repo stats computer for each user until a reset is requested
 
 def previous_monday(date):
     delta = timedelta(days=date.weekday())
     return date - delta
+
+class RepoStats(object): 
+    '''Computs stats about individual repositories on github.
+       Stores weekly commits in json format.'''
+
+    def __init__(self, repo_url, branch='master'):
+        self.url = repo_url
+        self.weekly_commits = []
+        self.max_commits = 0
+        self.branch = branch
+
+    def compute_stats(self):
+        try:
+            commits = github.commits.list(self.url, self.branch)
+        except RuntimeError:
+            raise LookupError('Error occured while fetching commits for ' + repo_url)
+
+        # increment previous week commits if week is the same
+        for c in reversed(commits):
+            date_id = format_date(previous_monday(c.committed_date.date()))
+            if not self.weekly_commits:
+                self.weekly_commits.append({'date': date_id, 'count': 1})
+            elif self.weekly_commits[-1]['date'] == date_id:
+                self.weekly_commits[-1]['count'] += 1
+            else:
+                self.weekly_commits.append({'date': date_id, 'count': 1})
+
+            self.max_commits = max(self.max_commits, self.weekly_commits[-1]['count'])
+
+        self.weekly_commits = json.dumps(self.weekly_commits)
 
 @app.route('/')
 @app.route('/weekly_commits/<username>')
@@ -24,45 +52,20 @@ def weekly_commits(username='ramin32'):
         try:
             repos = github.repos.list(username)
         except RuntimeError:
-            return render_template('commits.html', 
+            return render_template('error.html', 
                 username=username,
                 error='Invalid Username')
 
         repos_data = []
 
-        
+        # count commits per week for each repo
         for repo in repos:
             relative_repo_url = '%s/%s' % (username, repo.name)
+            repo_stats = RepoStats(relative_repo_url)
+            repo_stats.compute_stats()
+            repos_data.append(repo_stats)
 
-            try:
-                commits = github.commits.list(relative_repo_url, 'master')
-            except RuntimeError:
-                return render_template('commits.html', 
-                    username=username,
-                    error='An error occured while trying to fetch commits.')
-
-            weekly_commits = []
-            max_commits = 0
-
-            for c in reversed(commits):
-                date_id = format_date(previous_monday(c.committed_date.date()))
-                if not weekly_commits:
-                    weekly_commits.append({'date': date_id, 'count': 1})
-                elif weekly_commits[-1]['date'] == date_id:
-                    weekly_commits[-1]['count'] += 1
-                else:
-                    weekly_commits.append({'date': date_id, 'count': 1})
-                max_commits = max(max_commits, weekly_commits[-1]['count'])
-
-            data = dict(url=relative_repo_url,
-                        weekly_commits=json.dumps(weekly_commits),
-                        max_commits=max_commits)
-            repos_data.append(data)
-
-            data_cache[username] = repos_data
-
-        if not repos:
-            data_cache[username] = []
+        data_cache[username] = repos_data
 
     return render_template('commits.html', 
             username=username,
@@ -75,4 +78,5 @@ def clear_cache():
 
 
 if __name__ == "__main__":
+    app.debug = True
     app.run()
