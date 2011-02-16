@@ -1,0 +1,12 @@
+Displays weekly commits from each repository for a given user using histograms via the protovis js library.
+
+Default username is ramin32 but may be modified at runtime.
+
+TO RUN:
+pip install -r requirements.txt
+./app.py
+
+Author:
+Ramin Rakhamimov
+ramin32@gmail.com
+http://raminrakhamimov.tk

@@ -1,0 +1,99 @@
+<!doctype>
+
+<html>
+    <head>
+        <title>Weekly GitHub Commits</title>
+        <script type="text/javascript" src="/static/js/protovis-r3.2.js"></script>
+         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/actions.js"></script>
+         <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+    <h1>{{username}}'s weekly commits </h1>
+
+    <div id="site_actions">
+        {% if error %}
+        <div class="error">
+            {{error}}
+        </div>
+        {% endif %}
+        <p>
+            <label for="username_field">Username: </label>
+            <input type="text" value="{{username}}" id="username_field"/>
+            <input type="button" value="Update" id="update_button"/>
+        </p>
+        <p>
+        Commits are only loaded once, clear cache to see latest activity: <a href="{{url_for('clear_cache')}}"<input type="button" value="Clear Cache" id="clear_cache_button"/></a>
+        </p>
+    </div>
+
+    {% for repo_data in repos_data %}
+    <div id="histograms">
+    <div class="histogram">
+
+        <h4>{{repo_data['url']}}</h4>
+        <script type="text/javascript+protovis">
+            var commits = {{repo_data['weekly_commits']|safe}},
+                max_commits = {{repo_data['max_commits']}};
+
+            var data = pv.range(commits.length).map(function(d) commits[d].count);
+
+
+            /* Sizing and scales. */
+            var w = 400,
+                h = 250,
+                x = pv.Scale.linear(0, max_commits).range(0, w),
+                y = pv.Scale.ordinal(pv.range(commits.length)).splitBanded(0, h, 4/5);
+
+            /* The root panel. */
+                var vis = new pv.Panel()
+                    .width(w)
+                    .height(h)
+                    .bottom(20)
+                    .left(80)
+                    .right(10);
+
+                /* The bars. */
+                var bar = vis.add(pv.Bar)
+                    .data(data)
+                    .top(function() y(this.index))
+                    .height(y.range().band)
+                    .left(0)
+                    .width(x);
+
+                /* The value label. */
+                bar.anchor("right").add(pv.Label)
+                    .textStyle("white")
+                    .text(function(d) d.toFixed(1));
+
+                /* The variable label. */
+                bar.anchor("left").add(pv.Label)
+                    .textMargin(5)
+                    .textAlign("right")
+                    .text(function() commits[this.index].date);
+
+                /* X-axis ticks. */
+                vis.add(pv.Rule)
+                    .data(x.ticks(5))
+                    .left(x)
+                    .strokeStyle(function(d) d ? "rgba(255,255,255,.3)" : "#000")
+                    .add(pv.Rule)
+                    .bottom(0)
+                    .height(5)
+                    .strokeStyle("#000")
+                    .anchor("bottom").add(pv.Label)
+                    .text(x.tickFormat);
+
+                vis.render();
+
+                </script>
+            </div>
+
+            {% else %}
+            <h4> No repositories were found for {{username}} </h4>
+            {% endfor %}
+        </div>
+    </body>
+</html>
+
