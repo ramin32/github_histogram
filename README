@@ -8,6 +8,8 @@ TO RUN:
 pip install -r requirements.txt
 ./app.py
 
+I suggest you run the above commands within a separate virtualenv environment not to break any of your other python code.
+
 Author:
 Ramin Rakhamimov
 ramin32@gmail.com
