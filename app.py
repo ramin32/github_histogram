@@ -63,7 +63,7 @@ def weekly_commits(username='ramin32'):
             try:
                 repo_stats.compute_stats()
             except LookupError, e:
-                return render_template('error.html', username=username, error=e)
+                repo_stats.error = e
 
             repos_data.append(repo_stats)
 

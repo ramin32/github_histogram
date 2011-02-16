@@ -13,61 +13,68 @@ Commits are only loaded once, clear cache to see latest activity: <a href="{{url
 {% for repo_stats in repos_data %}
 <div class="histogram">
     <h4>{{repo_stats.url}}</h4>
-    <script type="text/javascript+protovis">
-        var commits = {{repo_stats.weekly_commits|safe}},
-            max_commits = {{repo_stats.max_commits}};
 
-        var data = pv.range(commits.length).map(function(d) commits[d].count);
+    {% if repo_stats.error %}
+        <div class="error">
+            {{repo_stats.error }}
+        </div>
+    {% else %}
+        <script type="text/javascript+protovis">
+            var commits = {{repo_stats.weekly_commits|safe}},
+                max_commits = {{repo_stats.max_commits}};
+
+            var data = pv.range(commits.length).map(function(d) commits[d].count);
 
 
-        /* Sizing and scales. */
-        var w = 400,
-            h = 250,
-            x = pv.Scale.linear(0, max_commits).range(0, w),
-            y = pv.Scale.ordinal(pv.range(commits.length)).splitBanded(0, h, 4/5);
+            /* Sizing and scales. */
+            var w = 400,
+                h = 250,
+                x = pv.Scale.linear(0, max_commits).range(0, w),
+                y = pv.Scale.ordinal(pv.range(commits.length)).splitBanded(0, h, 4/5);
 
-        /* The root panel. */
-            var vis = new pv.Panel()
-                .width(w)
-                .height(h)
-                .bottom(20)
-                .left(80)
-                .right(10);
+            /* The root panel. */
+                var vis = new pv.Panel()
+                    .width(w)
+                    .height(h)
+                    .bottom(20)
+                    .left(80)
+                    .right(10);
 
-            /* The bars. */
-            var bar = vis.add(pv.Bar)
-                .data(data)
-                .top(function() y(this.index))
-                .height(y.range().band)
-                .left(0)
-                .width(x);
+                /* The bars. */
+                var bar = vis.add(pv.Bar)
+                    .data(data)
+                    .top(function() y(this.index))
+                    .height(y.range().band)
+                    .left(0)
+                    .width(x);
 
-            /* The value label. */
-            bar.anchor("right").add(pv.Label)
-                .textStyle("white")
-                .text(function(d) d.toFixed(1));
+                /* The value label. */
+                bar.anchor("right").add(pv.Label)
+                    .textStyle("white")
+                    .text(function(d) d.toFixed(1));
 
-            /* The variable label. */
-            bar.anchor("left").add(pv.Label)
-                .textMargin(5)
-                .textAlign("right")
-                .text(function() commits[this.index].date);
+                /* The variable label. */
+                bar.anchor("left").add(pv.Label)
+                    .textMargin(5)
+                    .textAlign("right")
+                    .text(function() commits[this.index].date);
 
-            /* X-axis ticks. */
-            vis.add(pv.Rule)
-                .data(x.ticks(5))
-                .left(x)
-                .strokeStyle(function(d) d ? "rgba(255,255,255,.3)" : "#000")
-                .add(pv.Rule)
-                .bottom(0)
-                .height(5)
-                .strokeStyle("#000")
-                .anchor("bottom").add(pv.Label)
-                .text(x.tickFormat);
+                /* X-axis ticks. */
+                vis.add(pv.Rule)
+                    .data(x.ticks(5))
+                    .left(x)
+                    .strokeStyle(function(d) d ? "rgba(255,255,255,.3)" : "#000")
+                    .add(pv.Rule)
+                    .bottom(0)
+                    .height(5)
+                    .strokeStyle("#000")
+                    .anchor("bottom").add(pv.Label)
+                    .text(x.tickFormat);
 
-            vis.render();
+                vis.render();
 
-            </script>
+                </script>
+        {% endif %}
         </div>
 
         {% else %}
