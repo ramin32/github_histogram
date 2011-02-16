@@ -1,5 +1,7 @@
 Displays weekly commits from each repository for a given user using histograms via the protovis js library.
 
+The interface is a simple web app using the Flask web framework.
+
 Default username is ramin32 but may be modified at runtime.
 
 TO RUN:
