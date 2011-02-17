@@ -59,7 +59,9 @@ Commits are only loaded once, clear cache to see latest activity: <a href="{{url
                     .top(function() y(this.index))
                     .height(y.range().band)
                     .left(0)
-                    .width(x);
+                    .width(x)
+                    .fillStyle(pv.Colors.category20().by(pv.index));
+
 
                 /* The value label. */
                 bar.anchor("right").add(pv.Label)
