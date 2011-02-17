@@ -6,10 +6,10 @@ body{
 }
 
 .histogram {
-    border: 2px solid #008000;
+    border: 2px solid #000099;
     margin-top:15px;
     padding-left:5px;
-    background-color: #B0C4DE;
+    background-color: #FFFFFF;
     border-radius:15px;
     -moz-border-radius:15px;
     -webkit-border-radius: 15px;
